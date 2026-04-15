@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CRM Электролог">
+    
+    <title>CRM Электролога</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .install-prompt {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            background: white;
+            color: #10b981;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #10b981;
+        }
+
+        .badge-warning {
+            background: #f59e0b;
+        }
+
+        .badge-danger {
+            background: #ef4444;
+        }
+
+        .service-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .service-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .service-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .service-checkbox-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .service-checkbox-price {
+            color: #667eea;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-card h4 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .history-services {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .history-total {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .service-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e9ecef;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .quick-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .fab {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                padding-bottom: 80px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .tabs {
+                gap: 8px;
+            }
+
+            .tab {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        .color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .color-face { background: #8b5cf6; }
+        .color-body { background: #10b981; }
+        .color-bikini { background: #f59e0b; }
+        .color-special { background: #3b82f6; }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .offline-indicator {
+            background: #f59e0b;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .offline-indicator.show {
+            display: flex;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Install Prompt -->
+        <div class="install-prompt" id="installPrompt">
+            <div>
+                <strong>📱 Установить приложение?</strong><br>
+                <small>Работает оффлайн на вашем телефоне</small>
+            </div>
+            <button onclick="installApp()">Установить</button>
+        </div>
+
+        <!-- Offline Indicator -->
+        <div class="offline-indicator" id="offlineIndicator">
+            <span>⚠️</span>
+            <span>Оффлайн режим - данные сохраняются локально</span>
+        </div>
+
+        <div class="header">
+            <h1>💜 CRM Электролога</h1>
+            <p>Управление клиентами и процедурами</p>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('dashboard')">📊 Главная</button>
+            <button class="tab" onclick="switchTab('clients')">👥 Клиенты</button>
+            <button class="tab" onclick="switchTab('appointments')">📅 Процедуры</button>
+            <button class="tab" onclick="switchTab('services')">✨ Услуги</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Выручка за месяц</h4>
+                    <div class="value" id="monthRevenue">0 ₽</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Процедур за месяц</h4>
+                    <div class="value" id="monthAppointments">0</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Всего клиентов</h4>
+                    <div class="value" id="totalClients">0</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 15px; color: #333;">📅 Последние процедуры</h3>
+            <div id="recentAppointments"></div>
+        </div>
+
+        <!-- Clients -->
+        <div id="clients" class="content">
+            <div class="search-box">
+                <input type="text" id="clientSearch" placeholder="🔍 Поиск клиента..." onkeyup="searchClients()">
+            </div>
+            <button class="btn" onclick="openAddClientModal()" style="margin-bottom: 20px;">+ Добавить клиента</button>
+            <div id="clientsList"></div>
+        </div>
+
+        <!-- Appointments -->
+        <div id="appointments" class="content">
+            <button class="btn" onclick="openAddAppointmentModal()" style="margin-bottom: 20px;">+ Новая процедура</button>
+            <div id="appointmentsList"></div>
+        </div>
+
+        <!-- Services -->
+        <div id="services" class="content">
+            <button class="btn" onclick="openAddServiceModal()" style="margin-bottom: 20px;">+ Добавить услугу</button>
+            <div id="servicesList"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Client -->
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Новый клиент</h2>
+                <button class="close-btn" onclick="closeModal('addClientModal')">&times;</button>
+            </div>
+            <form onsubmit="addClient(event)">
+                <div class="form-group">
+                    <label>Имя *</label>
+                    <input type="text" id="clientName" required>
+                </div>
+                <div class="form-group">
+                    <label>Телефон *</label>
+                    <input type="tel" id="clientPhone" required placeholder="+7 (___) ___-__-__">
+                </div>
+                <div class="form-group">
+                    <label>Заметки</label>
+                    <textarea id="clientNotes" placeholder="Особенности, аллергии, предпочтения..."></textarea>
+                </div>
+                <button type="submit" class="btn">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Service -->
+    <div id="addServiceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Новая услуга</h2>
+                <button class="close-btn" onclick="closeModal('addServiceModal')">&times;</button>
+            </div>
+            <form onsubmit="addService(event)">
+                <div class="form-group">
+                    <label>Название *</label>
+                    <input type="text" id="serviceName" required placeholder="Например: Верхняя губа">
+                </div>
+                <div class="form-group">
+                    <label>Цена (₽) *</label>
+                    <input type="number" id="servicePrice" required min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label>Длительность (мин) *</label>
+                    <input type="number" id="serviceDuration" required min="5" step="5">
+                </div>
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select id="serviceColor">
+                        <option value="face">🟣 Лицо</option>
+                        <option value="body">🟢 Тело</option>
+                        <option value="bikini">🟠 Бикини</option>
+                        <option value="special">🔵 Спецзоны</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Appointment -->
+    <div id="addAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Новая процедура</h2>
+                <button class="close-btn" onclick="closeModal('addAppointmentModal')">&times;</button>
+            </div>
+            <form onsubmit="addAppointment(event)">
+                <div class="form-group">
+                    <label>Клиент *</label>
+                    <select id="appointmentClient" required>
+                        <option value="">Выберите клиента</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Дата и время *</label>
+                    <input type="datetime-local" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Услуги *</label>
+                    <div id="servicesCheckboxes"></div>
+                </div>
+                <div class="form-group">
+                    <label>Заметки</label>
+                    <textarea id="appointmentNotes" placeholder="Что происходило на сеансе..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Итого: <span id="appointmentTotal" style="color: #667eea; font-weight: 700; font-size: 20px;">0 ₽</span></label>
+                    <label>Длительность: <span id="appointmentDuration" style="color: #667eea; font-weight: 700;">0 мин</span></label>
+                </div>
+                <button type="submit" class="btn">Сохранить процедуру</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Client Details -->
+    <div id="clientDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="clientDetailsName"></h2>
+                <button class="close-btn" onclick="closeModal('clientDetailsModal')">&times;</button>
+            </div>
+            <div id="clientDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="fab" onclick="openAddAppointmentModal()" title="Новая процедура">+</button>
+    </div>
+
+    <script>
+        // Database using localStorage
+        let db = {
+            clients: [],
+            services: [],
+            appointments: []
+        };
+
+        // PWA Install
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App installed');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').classList.remove('show');
+                });
+            }
+        }
+
+        // Check online/offline status
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                document.getElementById('offlineIndicator').classList.add('show');
+            } else {
+                document.getElementById('offlineIndicator').classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // Load data from localStorage
+        function loadData() {
+            try {
+                const clientsData = localStorage.getItem('crm_clients');
+                const servicesData = localStorage.getItem('crm_services');
+                const appointmentsData = localStorage.getItem('crm_appointments');
+                
+                db.clients = clientsData ? JSON.parse(clientsData) : [];
+                db.services = servicesData ? JSON.parse(servicesData) : [];
+                db.appointments = appointmentsData ? JSON.parse(appointmentsData) : [];
+                
+                console.log('Data loaded:', db);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                db.clients = [];
+                db.services = [];
+                db.appointments = [];
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            try {
+                localStorage.setItem('crm_clients', JSON.stringify(db.clients));
+                localStorage.setItem('crm_services', JSON.stringify(db.services));
+                localStorage.setItem('crm_appointments', JSON.stringify(db.appointments));
+                console.log('Data saved successfully');
+                return true;
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Ошибка при сохранении данных. Проверьте настройки браузера.');
+                return false;
+            }
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.classList.add('show');
+            setTimeout(() => {
+                el.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize app
+        function init() {
+            loadData();
+            updateOnlineStatus();
+            
+            // Add demo data if empty
+            if (db.clients.length === 0 && db.services.length === 0) {
+                addDemoData();
+            }
+            
+            renderAll();
+        }
+
+        function addDemoData() {
+            // Demo services
+            db.services = [
+                { id: 1, name: 'Верхняя губа', price: 800, duration: 15, color: 'face', active: true },
+                { id: 2, name: 'Подбородок', price: 1200, duration: 20, color: 'face', active: true },
+                { id: 3, name: 'Подмышки', price: 1500, duration: 30, color: 'body', active: true },
+                { id: 4, name: 'Бикини классическое', price: 2000, duration: 40, color: 'bikini', active: true },
+                { id: 5, name: 'Голени', price: 3000, duration: 60, color: 'body', active: true }
+            ];
+
+            // Demo clients
+            db.clients = [
+                { id: 1, name: 'Анна Петрова', phone: '+7 (999) 123-45-67', notes: 'Чувствительная кожа', createdAt: Date.now() },
+                { id: 2, name: 'Мария Иванова', phone: '+7 (999) 234-56-78', notes: '', createdAt: Date.now() }
+            ];
+
+            // Demo appointments
+            const today = new Date();
+            db.appointments = [
+                {
+                    id: 1,
+                    clientId: 1,
+                    date: today.toISOString(),
+                    serviceIds: [1, 2],
+                    notes: 'Все прошло отлично',
+                    total: 2000,
+                    duration: 35
+                }
+            ];
+
+            saveData();
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            
+            // Add active to clicked tab
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            renderAll();
+        }
+
+        // Modal functions
+        function openAddClientModal() {
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientPhone').value = '';
+            document.getElementById('clientNotes').value = '';
+            document.getElementById('addClientModal').classList.add('active');
+        }
+
+        function openAddServiceModal() {
+            document.getElementById('serviceName').value = '';
+            document.getElementById('servicePrice').value = '';
+            document.getElementById('serviceDuration').value = '';
+            document.getElementById('serviceColor').value = 'face';
+            document.getElementById('addServiceModal').classList.add('active');
+        }
+
+        function openAddAppointmentModal() {
+            populateClientSelect();
+            populateServicesCheckboxes();
+            
+            // Set current date/time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('appointmentDate').value = now.toISOString().slice(0, 16);
+            document.getElementById('appointmentNotes').value = '';
+            
+            // Clear checkboxes
+            document.querySelectorAll('#servicesCheckboxes input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            updateAppointmentTotal();
+            
+            document.getElementById('addAppointmentModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Add Client
+        function addClient(event) {
+            event.preventDefault();
+            
+            const client = {
+                id: Date.now(),
+                name: document.getElementById('clientName').value.trim(),
+                phone: document.getElementById('clientPhone').value.trim(),
+                notes: document.getElementById('clientNotes').value.trim(),
+                createdAt: Date.now()
+            };
+            
+            db.clients.push(client);
+            
+            if (saveData()) {
+                showSuccess('✓ Клиент добавлен');
+                closeModal('addClientModal');
+                renderAll();
+            }
+        }
+
+        // Add Service
+        function addService(event) {
+            event.preventDefault();
+            
+            const service = {
+                id: Date.now(),
+                name: document.getElementById('serviceName').value.trim(),
+                price: parseInt(document.getElementById('servicePrice').value),
+                duration: parseInt(document.getElementById('serviceDuration').value),
+                color: document.getElementById('serviceColor').value,
+                active: true
+            };
+            
+            db.services.push(service);
+            
+            if (saveData()) {
+                showSuccess('✓ Услуга добавлена');
+                closeModal('addServiceModal');
+                renderAll();
+            }
+        }
+
+        // Add Appointment
+        function addAppointment(event) {
+            event.preventDefault();
+            
+            const selectedServices = Array.from(document.querySelectorAll('#servicesCheckboxes input:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedServices.length === 0) {
+                alert('Выберите хотя бы одну услугу');
+                return;
+            }
+            
+            const total = selectedServices.reduce((sum, serviceId) => {
+                const service = db.services.find(s => s.id === serviceId);
+                return sum + (service ? service.price : 0);
+            }, 0);
+            
+            const duration = selectedServices.reduce((sum, serviceId) => {
+                const service = db.services.find(s => s.id === serviceId);
+                return sum + (service ? service.duration : 0);
+            }, 0);
+            
+            const appointment = {
+                id: Date.now(),
+                clientId: parseInt(document.getElementById('appointmentClient').value),
+                date: document.getElementById('appointmentDate').value,
+                serviceIds: selectedServices,
+                notes: document.getElementById('appointmentNotes').value.trim(),
+                total: total,
+                duration: duration
+            };
+            
+            db.appointments.push(appointment);
+            
+            if (saveData()) {
+                showSuccess('✓ Процедура добавлена');
+                closeModal('addAppointmentModal');
+                renderAll();
+            }
+        }
+
+        // Populate client select
+        function populateClientSelect() {
+            const select = document.getElementById('appointmentClient');
+            select.innerHTML = '<option value="">Выберите клиента</option>';
+            
+            db.clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = client.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Populate services checkboxes
+        function populateServicesCheckboxes() {
+            const container = document.getElementById('servicesCheckboxes');
+            container.innerHTML = '';
+            
+            const activeServices = db.services.filter(s => s.active);
+            
+            if (activeServices.length === 0) {
+                container.innerHTML = '<p style="color: #999;">Добавьте услуги в раздел "Услуги"</p>';
+                return;
+            }
+            
+            activeServices.forEach(service => {
+                const div = document.createElement('div');
+                div.className = 'service-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" value="${service.id}" id="service_${service.id}" onchange="updateAppointmentTotal()">
+                    <label class="service-checkbox-label" for="service_${service.id}">
+                        <span class="color-indicator color-${service.color}"></span>
+                        ${service.name} (${service.duration} мин)
+                    </label>
+                    <span class="service-checkbox-price">${service.price} ₽</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Update appointment total
+        function updateAppointmentTotal() {
+            const selectedServices = Array.from(document.querySelectorAll('#servicesCheckboxes input:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            const total = selectedServices.reduce((sum, serviceId) => {
+                const service = db.services.find(s => s.id === serviceId);
+                return sum + (service ? service.price : 0);
+            }, 0);
+            
+            const duration = selectedServices.reduce((sum, serviceId) => {
+                const service = db.services.find(s => s.id === serviceId);
+                return sum + (service ? service.duration : 0);
+            }, 0);
+            
+            document.getElementById('appointmentTotal').textContent = `${total} ₽`;
+            document.getElementById('appointmentDuration').textContent = `${duration} мин`;
+        }
+
+        // Render functions
+        function renderAll() {
+            renderDashboard();
+            renderClients();
+            renderAppointments();
+            renderServices();
+        }
+
+        function renderDashboard() {
+            // Calculate stats
+            const now = new Date();
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            const monthAppointments = db.appointments.filter(a => new Date(a.date) >= firstDayOfMonth);
+            const monthRevenue = monthAppointments.reduce((sum, a) => sum + a.total, 0);
+            
+            document.getElementById('monthRevenue').textContent = `${monthRevenue.toLocaleString()} ₽`;
+            document.getElementById('monthAppointments').textContent = monthAppointments.length;
+            document.getElementById('totalClients').textContent = db.clients.length;
+            
+            // Recent appointments
+            const recent = db.appointments
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5);
+            
+            const container = document.getElementById('recentAppointments');
+            
+            if (recent.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Процедур пока нет</p>
+                        <button class="btn" onclick="openAddAppointmentModal()" style="margin-top: 20px;">Добавить первую процедуру</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recent.map(appointment => {
+                const client = db.clients.find(c => c.id === appointment.clientId);
+                const services = appointment.serviceIds.map(id => db.services.find(s => s.id === id)).filter(s => s);
+                const date = new Date(appointment.date);
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
+                            <span class="badge">${appointment.total} ₽</span>
+                        </div>
+                        <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
+                        <p>✨ ${services.map(s => s.name).join(', ')}</p>
+                        <p>⏱ ${appointment.duration} минут</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderClients() {
+            const container = document.getElementById('clientsList');
+            
+            if (db.clients.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Клиентов пока нет</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const clientsWithStats = db.clients.map(client => {
+                const appointments = db.appointments.filter(a => a.clientId === client.id);
+                const totalSpent = appointments.reduce((sum, a) => sum + a.total, 0);
+                const lastVisit = appointments.length > 0 
+                    ? new Date(Math.max(...appointments.map(a => new Date(a.date))))
+                    : null;
+                
+                return {
+                    ...client,
+                    totalVisits: appointments.length,
+                    totalSpent,
+                    lastVisit
+                };
+            }).sort((a, b) => (b.lastVisit || 0) - (a.lastVisit || 0));
+            
+            container.innerHTML = clientsWithStats.map(client => `
+                <div class="card" onclick="showClientDetails(${client.id})">
+                    <div class="card-header">
+                        <h3>${client.name}</h3>
+                        ${client.totalVisits > 5 ? '<span class="badge badge-success">VIP</span>' : ''}
+                    </div>
+                    <p>📱 ${client.phone}</p>
+                    <p>💰 Потрачено: ${client.totalSpent.toLocaleString()} ₽</p>
+                    <p>📊 Визитов: ${client.totalVisits}</p>
+                    ${client.lastVisit ? `<p>📅 Последний визит: ${client.lastVisit.toLocaleDateString('ru-RU')}</p>` : '<p>📅 Еще не было визитов</p>'}
+                    ${client.notes ? `<p style="margin-top: 10px; font-style: italic; color: #999;">💬 ${client.notes}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function searchClients() {
+            const query = document.getElementById('clientSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('#clientsList .card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        }
+
+        function showClientDetails(clientId) {
+            const client = db.clients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            const appointments = db.appointments
+                .filter(a => a.clientId === clientId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const totalSpent = appointments.reduce((sum, a) => sum + a.total, 0);
+            
+            document.getElementById('clientDetailsName').textContent = client.name;
+            
+            const content = `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>Телефон:</strong> ${client.phone}</p>
+                    ${client.notes ? `<p><strong>Заметки:</strong> ${client.notes}</p>` : ''}
+                    <p><strong>Всего визитов:</strong> ${appointments.length}</p>
+                    <p><strong>Всего потрачено:</strong> ${totalSpent.toLocaleString()} ₽</p>
+                </div>
+                
+                <h3 style="margin-bottom: 15px; color: #333;">История процедур</h3>
+                ${appointments.length === 0 ? '<p style="color: #999;">Процедур пока нет</p>' : appointments.map(appointment => {
+                    const services = appointment.serviceIds.map(id => db.services.find(s => s.id === id)).filter(s => s);
+                    const date = new Date(appointment.date);
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="history-date">${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</div>
+                            <div class="history-services">
+                                ${services.map(s => `<span class="service-tag">${s.name}</span>`).join('')}
+                            </div>
+                            ${appointment.notes ? `<p style="margin: 8px 0; color: #666;">${appointment.notes}</p>` : ''}
+                            <div class="history-total">Итого: ${appointment.total} ₽ • ${appointment.duration} мин</div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+            
+            document.getElementById('clientDetailsContent').innerHTML = content;
+            document.getElementById('clientDetailsModal').classList.add('active');
+        }
+
+        function renderAppointments() {
+            const container = document.getElementById('appointmentsList');
+            
+            if (db.appointments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Процедур пока нет</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const appointments = db.appointments
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = appointments.map(appointment => {
+                const client = db.clients.find(c => c.id === appointment.clientId);
+                const services = appointment.serviceIds.map(id => db.services.find(s => s.id === id)).filter(s => s);
+                const date = new Date(appointment.date);
+                
+                return `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
+                            <span class="badge">${appointment.total} ₽</span>
+                        </div>
+                        <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
+                        <div style="margin: 10px 0;">
+                            ${services.map(s => `<span class="service-tag"><span class="color-indicator color-${s.color}"></span>${s.name}</span>`).join('')}
+                        </div>
+                        <p>⏱ ${appointment.duration} минут</p>
+                        ${appointment.notes ? `<p style="margin-top: 10px; font-style: italic; color: #999;">💬 ${appointment.notes}</p>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderServices() {
+            const container = document.getElementById('servicesList');
+            
+            if (db.services.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Услуг пока нет</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const grouped = {
+                face: [],
+                body: [],
+                bikini: [],
+                special: []
+            };
+            
+            db.services.forEach(service => {
+                if (grouped[service.color]) {
+                    grouped[service.color].push(service);
+                }
+            });
+            
+            const colorNames = {
+                face: '🟣 Лицо',
+                body: '🟢 Тело',
+                bikini: '🟠 Бикини',
+                special: '🔵 Спецзоны'
+            };
+            
+            let html = '';
+            
+            Object.keys(grouped).forEach(color => {
+                if (grouped[color].length > 0) {
+                    html += `<h3 style="margin: 20px 0 15px 0; color: #333;">${colorNames[color]}</h3>`;
+                    html += grouped[color].map(service => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>${service.name}</h3>
+                                <span class="badge">${service.price} ₽</span>
+                            </div>
+                            <p>⏱ ${service.duration} минут</p>
+                            <p style="color: ${service.active ? '#10b981' : '#ef4444'};">
+                                ${service.active ? '✓ Активна' : '✗ Не активна'}
+                            </p>
+                        </div>
+                    `).join('');
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
