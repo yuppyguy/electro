@@ -2,7 +2,7 @@
   "name": "CRM Электролога",
   "short_name": "CRM",
   "description": "Управление клиентами и процедурами для электролога",
-  "start_url": "./crm_pwa.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
