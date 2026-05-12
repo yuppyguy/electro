@@ -312,7 +312,9 @@ function addDemoData() {
         { id: 11, name: 'Пальцы ног', duration: 15, color: 'body', active: true },
         { id: 12, name: 'Пальцы рук', duration: 15, color: 'body', active: true },
         { id: 13, name: 'Живот', duration: 30, color: 'body', active: true },
-        { id: 14, name: 'Ареолы', duration: 20, color: 'special', active: true }
+        { id: 14, name: 'Ареолы', duration: 20, color: 'special', active: true },
+        { id: 15, name: 'Голень', duration: 45, color: 'body', active: true },
+        { id: 16, name: 'Межягодичка', duration: 25, color: 'special', active: true }
     ];
 
     // db.clients = [
@@ -394,12 +396,15 @@ function closeModal(modalId) {
 function addClient(event) {
     event.preventDefault();
     
+    const avatarFile = document.getElementById('clientAvatar').files[0];
+
     const client = {
         id: Date.now(),
         name: document.getElementById('clientName').value.trim(),
         phone: document.getElementById('clientPhone').value.trim(),
         instagram: document.getElementById('clientInstagram').value.trim(),
         notes: document.getElementById('clientNotes').value.trim(),
+        avatar: avatarFile ? URL.createObjectURL(avatarFile) : '',
         createdAt: Date.now()
     };
     
@@ -454,6 +459,20 @@ function addAppointment(event) {
         const service = db.services.find(s => s.id === serviceId);
         return sum + (service ? service.duration : 0);
     }, 0);
+
+    const photos = Array.from(document.getElementById('appointmentPhotos').files || [])
+        .map(file => URL.createObjectURL(file));
+
+    const zones = selectedServices.map(serviceId => {
+        const service = db.services.find(s => s.id === serviceId);
+
+        return {
+            serviceId,
+            name: service ? service.name : '',
+            time: service ? service.duration : 0,
+            power: 'OFF'
+        };
+    });
     
     const appointment = {
         id: Date.now(),
@@ -462,7 +481,9 @@ function addAppointment(event) {
         serviceIds: selectedServices,
         notes: document.getElementById('appointmentNotes').value.trim(),
         total: total,
-        duration: duration
+        duration: duration,
+        zones: zones,
+        photos: photos
     };
     
     db.appointments.push(appointment);
@@ -520,6 +541,20 @@ function updateAppointmentDuration() {
         const service = db.services.find(s => s.id === serviceId);
         return sum + (service ? service.duration : 0);
     }, 0);
+
+    const photos = Array.from(document.getElementById('appointmentPhotos').files || [])
+        .map(file => URL.createObjectURL(file));
+
+    const zones = selectedServices.map(serviceId => {
+        const service = db.services.find(s => s.id === serviceId);
+
+        return {
+            serviceId,
+            name: service ? service.name : '',
+            time: service ? service.duration : 0,
+            power: 'OFF'
+        };
+    });
     
     document.getElementById('appointmentDuration').textContent = `${duration} мин`;
 }
@@ -658,6 +693,33 @@ function todayMonth() {
     renderCalendar();
 }
 
+
+function deleteClient(clientId) {
+    if (!confirm('Удалить клиента?')) return;
+
+    db.clients = db.clients.filter(c => c.id !== clientId);
+    db.appointments = db.appointments.filter(a => a.clientId !== clientId);
+
+    saveData();
+    renderAll();
+    closeModal('clientDetailsModal');
+    showSuccess('✓ Клиент удален');
+}
+
+
+function deleteAppointment(appointmentId) {
+    if (!confirm('Удалить процедуру?')) return;
+
+    db.appointments = db.appointments.filter(a => a.id !== appointmentId);
+
+    saveData();
+    renderAll();
+    renderCalendar();
+
+    showSuccess('✓ Процедура удалена');
+}
+
+
 // Render functions
 function renderAll() {
     renderDashboard();
@@ -702,7 +764,7 @@ function renderDashboard() {
             <div class="card">
                 <div class="card-header">
                     <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
-                    <span class="badge">${appointment.total} ₽</span>
+                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} ₽</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
                 </div>
                 <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
                 <p>✨ ${services.map(s => s.name).join(', ')}</p>
@@ -742,7 +804,7 @@ function renderClients() {
     container.innerHTML = clientsWithStats.map(client => `
         <div class="card" onclick="showClientDetails(${client.id})">
             <div class="card-header">
-                <h3>${client.name}</h3>
+                ${client.avatar ? `<img src="${client.avatar}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:10px;">` : ""}<h3>${client.name}</h3>
                 ${client.totalVisits > 5 ? '<span class="badge badge-success">VIP</span>' : ''}
             </div>
             <p>📱 ${client.phone}</p>
@@ -785,6 +847,10 @@ function showClientDetails(clientId) {
             <p><strong>Всего визитов:</strong> ${appointments.length}</p>
             <p><strong>Всего потрачено:</strong> ${totalSpent.toLocaleString()} BYN</p>
         </div>
+
+        <button class="btn btn-small" style="background:#ef4444;margin-bottom:20px;" onclick="deleteClient(${client.id})">
+            Удалить клиента
+        </button>
         
         <h3 style="margin-bottom: 15px; color: #333;">История процедур</h3>
         ${appointments.length === 0 ? '<p style="color: #999;">Процедур пока нет</p>' : appointments.map(appointment => {
@@ -832,7 +898,7 @@ function renderAppointments() {
             <div class="card">
                 <div class="card-header">
                     <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
-                    <span class="badge">${appointment.total} ₽</span>
+                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} ₽</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
                 </div>
                 <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
                 <div style="margin: 10px 0;">

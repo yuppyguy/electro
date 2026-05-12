@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CRM Электролог">
     
-    <title>CRM Электролога</title>
+    <title>Electro CRM</title>
     
     <link rel="manifest" href="manifest.json">
     
@@ -686,7 +686,7 @@
         </div>
 
         <div class="header">
-            <h1>💜 CRM Manya-Электролога</h1>
+            <h1>💜 CRM Электролога</h1>
             <p>Управление клиентами и процедурами</p>
         </div>
 
@@ -845,10 +845,22 @@
                     <label>Телефон *</label>
                     <input type="tel" id="clientPhone" required placeholder="+375 (__) ___-__-__">
                 </div>
+                
+                <div class="form-group">
+                    <label>Аватар клиента</label>
+                    <input type="file" id="clientAvatar" accept="image/*">
+                </div>
+
                 <div class="form-group">
                     <label>Instagram</label>
                     <input type="text" id="clientInstagram" placeholder="@username">
                 </div>
+                
+                <div class="form-group">
+                    <label>Фото процедуры</label>
+                    <input type="file" id="appointmentPhotos" accept="image/*" multiple>
+                </div>
+
                 <div class="form-group">
                     <label>Заметки</label>
                     <textarea id="clientNotes" placeholder="Особенности, аллергии, предпочтения..."></textarea>
@@ -915,7 +927,7 @@
                     <input type="number" id="appointmentTotal" required min="0" step="1" placeholder="Введите сумму">
                 </div>
                 <div class="form-group">
-                    <label>Длительность: <span id="appointmentDuration" style="color: #667eea; font-weight: 700;">0 мин</span></label>
+                    <label>Общее время: <span id="appointmentDuration" style="color: #667eea; font-weight: 700;">0 мин</span></label>
                 </div>
                 <div class="form-group">
                     <label>Заметки</label>
