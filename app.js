@@ -300,21 +300,21 @@ function init() {
 function addDemoData() {
     db.services = [
         { id: 1, name: 'Верхняя губа', duration: 15, color: 'face', active: true },
-        { id: 2, name: 'Подбородок', duration: 20, color: 'face', active: true },
-        { id: 3, name: 'Виски', duration: 15, color: 'face', active: true },
-        { id: 4, name: 'Подмышки', duration: 30, color: 'body', active: true },
-        { id: 5, name: 'Бикини классика', duration: 40, color: 'bikini', active: true },
-        { id: 6, name: 'Бикини глубокое', duration: 50, color: 'bikini', active: true },
-        { id: 7, name: 'Половые губы', duration: 30, color: 'bikini', active: true },
-        { id: 8, name: 'Ягодицы', duration: 45, color: 'body', active: true },
-        { id: 9, name: 'Руки', duration: 60, color: 'body', active: true },
-        { id: 10, name: 'Ноги', duration: 90, color: 'body', active: true },
+        { id: 2, name: 'Подбородок', duration: 15, color: 'face', active: true },
+        { id: 3, name: 'Виски', duration: 20, color: 'face', active: true },
+        { id: 4, name: 'Подмышки', duration: 20, color: 'body', active: true },
+        { id: 5, name: 'Бикини классика', duration: 30, color: 'bikini', active: true },
+        { id: 6, name: 'Бикини глубокое', duration: 40, color: 'bikini', active: true },
+        { id: 7, name: 'Половые губы', duration: 25, color: 'bikini', active: true },
+        { id: 8, name: 'Ягодицы', duration: 30, color: 'body', active: true },
+        { id: 9, name: 'Руки', duration: 35, color: 'body', active: true },
+        { id: 10, name: 'Ноги', duration: 60, color: 'body', active: true },
         { id: 11, name: 'Пальцы ног', duration: 15, color: 'body', active: true },
         { id: 12, name: 'Пальцы рук', duration: 15, color: 'body', active: true },
-        { id: 13, name: 'Живот', duration: 30, color: 'body', active: true },
+        { id: 13, name: 'Живот', duration: 25, color: 'body', active: true },
         { id: 14, name: 'Ареолы', duration: 20, color: 'special', active: true },
-        { id: 15, name: 'Голень', duration: 45, color: 'body', active: true },
-        { id: 16, name: 'Межягодичка', duration: 25, color: 'special', active: true }
+        { id: 15, name: 'Голень', duration: 40, color: 'body', active: true },
+        { id: 16, name: 'Межягодичка', duration: 20, color: 'special', active: true }
     ];
 
     // db.clients = [
@@ -448,31 +448,12 @@ function addAppointment(event) {
         return;
     }
     
-    const total = parseInt(document.getElementById('appointmentTotal').value) || 0;
-    
-    if (total === 0) {
-        alert('Введите общую сумму');
-        return;
-    }
-    
     const duration = selectedServices.reduce((sum, serviceId) => {
         const service = db.services.find(s => s.id === serviceId);
         return sum + (service ? service.duration : 0);
     }, 0);
-
-    const photos = Array.from(document.getElementById('appointmentPhotos').files || [])
-        .map(file => URL.createObjectURL(file));
-
-    const zones = selectedServices.map(serviceId => {
-        const service = db.services.find(s => s.id === serviceId);
-
-        return {
-            serviceId,
-            name: service ? service.name : '',
-            time: service ? service.duration : 0,
-            power: 'OFF'
-        };
-    });
+    
+    const total = parseInt(document.getElementById('appointmentTotal').value) || 0;   // <-- добавить эту строку
     
     const appointment = {
         id: Date.now(),
@@ -481,9 +462,7 @@ function addAppointment(event) {
         serviceIds: selectedServices,
         notes: document.getElementById('appointmentNotes').value.trim(),
         total: total,
-        duration: duration,
-        zones: zones,
-        photos: photos
+        duration: duration
     };
     
     db.appointments.push(appointment);
@@ -495,6 +474,7 @@ function addAppointment(event) {
         renderCalendar();
     }
 }
+
 
 function populateClientSelect() {
     const select = document.getElementById('appointmentClient');
@@ -541,20 +521,6 @@ function updateAppointmentDuration() {
         const service = db.services.find(s => s.id === serviceId);
         return sum + (service ? service.duration : 0);
     }, 0);
-
-    const photos = Array.from(document.getElementById('appointmentPhotos').files || [])
-        .map(file => URL.createObjectURL(file));
-
-    const zones = selectedServices.map(serviceId => {
-        const service = db.services.find(s => s.id === serviceId);
-
-        return {
-            serviceId,
-            name: service ? service.name : '',
-            time: service ? service.duration : 0,
-            power: 'OFF'
-        };
-    });
     
     document.getElementById('appointmentDuration').textContent = `${duration} мин`;
 }
@@ -717,6 +683,27 @@ function deleteAppointment(appointmentId) {
     renderCalendar();
 
     showSuccess('✓ Процедура удалена');
+}
+
+function deleteService(serviceId) {
+    if (!confirm('Удалить услугу? Она пропадёт из всех процедур.')) return;
+    
+    db.services = db.services.filter(s => s.id !== serviceId);
+    
+    // Также удаляем эту услугу из всех процедур (из массивов serviceIds)
+    db.appointments.forEach(app => {
+        app.serviceIds = app.serviceIds.filter(id => id !== serviceId);
+        // Пересчитываем длительность и общую сумму? Лучше оставить как есть, но можно пересчитать
+        app.duration = app.serviceIds.reduce((sum, id) => {
+            const service = db.services.find(s => s.id === id);
+            return sum + (service ? service.duration : 0);
+        }, 0);
+    });
+    
+    saveData();
+    renderServices();    // перерисовываем только услуги
+    renderAll();         // или renderAll(), чтобы обновились процедуры
+    showSuccess('Услуга удалена');
 }
 
 
@@ -952,7 +939,7 @@ function renderServices() {
                 <div class="card">
                     <div class="card-header">
                         <h3>${service.name}</h3>
-                        <span class="badge">${service.price} ₽</span>
+                        <button class="btn-small btn-secondary" onclick="event.stopPropagation(); deleteService(${service.id})" style="background:#ef4444; color:white;">🗑</button>
                     </div>
                     <p>⏱ ${service.duration} минут</p>
                 </div>

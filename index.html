@@ -856,10 +856,6 @@
                     <input type="text" id="clientInstagram" placeholder="@username">
                 </div>
                 
-                <div class="form-group">
-                    <label>Фото процедуры</label>
-                    <input type="file" id="appointmentPhotos" accept="image/*" multiple>
-                </div>
 
                 <div class="form-group">
                     <label>Заметки</label>
@@ -924,7 +920,7 @@
                 </div>
                 <div class="form-group">
                     <label>Общая сумма (BYN) *</label>
-                    <input type="number" id="appointmentTotal" required min="0" step="1" placeholder="Введите сумму">
+                    <input type="number" id="appointmentTotal" min="0" step="1" placeholder="Введите сумму">
                 </div>
                 <div class="form-group">
                     <label>Общее время: <span id="appointmentDuration" style="color: #667eea; font-weight: 700;">0 мин</span></label>
@@ -932,6 +928,10 @@
                 <div class="form-group">
                     <label>Заметки</label>
                     <textarea id="appointmentNotes" placeholder="Что происходило на сеансе..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Фото процедуры</label>
+                    <input type="file" id="appointmentPhotos" accept="image/*" multiple>
                 </div>
                 <button type="submit" class="btn">Сохранить процедуру</button>
             </form>
