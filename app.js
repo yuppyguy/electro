@@ -299,22 +299,22 @@ function init() {
 
 function addDemoData() {
     db.services = [
-        { id: 1, name: 'Верхняя губа', duration: 15, color: 'face', active: true },
-        { id: 2, name: 'Подбородок', duration: 15, color: 'face', active: true },
-        { id: 3, name: 'Виски', duration: 20, color: 'face', active: true },
-        { id: 4, name: 'Подмышки', duration: 20, color: 'body', active: true },
-        { id: 5, name: 'Бикини классика', duration: 30, color: 'bikini', active: true },
-        { id: 6, name: 'Бикини глубокое', duration: 40, color: 'bikini', active: true },
-        { id: 7, name: 'Половые губы', duration: 25, color: 'bikini', active: true },
-        { id: 8, name: 'Ягодицы', duration: 30, color: 'body', active: true },
-        { id: 9, name: 'Руки', duration: 35, color: 'body', active: true },
-        { id: 10, name: 'Ноги', duration: 60, color: 'body', active: true },
-        { id: 11, name: 'Пальцы ног', duration: 15, color: 'body', active: true },
-        { id: 12, name: 'Пальцы рук', duration: 15, color: 'body', active: true },
-        { id: 13, name: 'Живот', duration: 25, color: 'body', active: true },
-        { id: 14, name: 'Ареолы', duration: 20, color: 'special', active: true },
-        { id: 15, name: 'Голень', duration: 40, color: 'body', active: true },
-        { id: 16, name: 'Межягодичка', duration: 20, color: 'special', active: true }
+        { id: 1, name: 'Верхняя губа', color: 'face', active: true },
+        { id: 2, name: 'Подбородок', color: 'face', active: true },
+        { id: 3, name: 'Виски', color: 'face', active: true },
+        { id: 4, name: 'Подмышки', color: 'body', active: true },
+        { id: 5, name: 'Бикини классика', color: 'bikini', active: true },
+        { id: 6, name: 'Бикини глубокое', color: 'bikini', active: true },
+        { id: 7, name: 'Половые губы', color: 'bikini', active: true },
+        { id: 8, name: 'Ягодицы', color: 'body', active: true },
+        { id: 9, name: 'Руки', color: 'body', active: true },
+        { id: 10, name: 'Ноги', color: 'body', active: true },
+        { id: 11, name: 'Пальцы ног', color: 'body', active: true },
+        { id: 12, name: 'Пальцы рук', color: 'body', active: true },
+        { id: 13, name: 'Живот', color: 'body', active: true },
+        { id: 14, name: 'Ареолы', color: 'special', active: true },
+        { id: 15, name: 'Голень', color: 'body', active: true },
+        { id: 16, name: 'Межягодичка', color: 'special', active: true }
     ];
 
     // db.clients = [
@@ -364,7 +364,7 @@ function openAddClientModal() {
 
 function openAddServiceModal() {
     document.getElementById('serviceName').value = '';
-    document.getElementById('serviceDuration').value = '';
+    // document.getElementById('serviceDuration').value = '';
     document.getElementById('serviceColor').value = 'face';
     document.getElementById('addServiceModal').classList.add('active');
 }
@@ -378,12 +378,14 @@ function openAddAppointmentModal() {
     document.getElementById('appointmentDate').value = now.toISOString().slice(0, 16);
     document.getElementById('appointmentNotes').value = '';
     document.getElementById('appointmentTotal').value = '';
+    document.getElementById('appointmentDurationInput').value = '';   
+    document.getElementById('appointmentPhotos').value = '';
     
     document.querySelectorAll('#servicesCheckboxes input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
     });
     
-    updateAppointmentDuration();
+    // updateAppointmentDuration();
     
     document.getElementById('addAppointmentModal').classList.add('active');
 }
@@ -423,7 +425,7 @@ function addService(event) {
     const service = {
         id: Date.now(),
         name: document.getElementById('serviceName').value.trim(),
-        duration: parseInt(document.getElementById('serviceDuration').value),
+        // duration: parseInt(document.getElementById('serviceDuration').value),
         color: document.getElementById('serviceColor').value,
         active: true
     };
@@ -437,7 +439,7 @@ function addService(event) {
     }
 }
 
-function addAppointment(event) {
+async function addAppointment(event) {
     event.preventDefault();
     
     const selectedServices = Array.from(document.querySelectorAll('#servicesCheckboxes input:checked'))
@@ -448,12 +450,21 @@ function addAppointment(event) {
         return;
     }
     
-    const duration = selectedServices.reduce((sum, serviceId) => {
-        const service = db.services.find(s => s.id === serviceId);
-        return sum + (service ? service.duration : 0);
-    }, 0);
+    const total = parseInt(document.getElementById('appointmentTotal').value) || 0;
+    const duration = parseInt(document.getElementById('appointmentDurationInput').value) || 0;
+    if (duration === 0 && !confirm('Вы не указали общее время. Продолжить?')) return;
     
-    const total = parseInt(document.getElementById('appointmentTotal').value) || 0;   // <-- добавить эту строку
+    // Конвертируем фото в base64
+    const photoFiles = Array.from(document.getElementById('appointmentPhotos').files);
+    const photosBase64 = [];
+    for (const file of photoFiles) {
+        const base64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+        photosBase64.push(base64);
+    }
     
     const appointment = {
         id: Date.now(),
@@ -462,11 +473,11 @@ function addAppointment(event) {
         serviceIds: selectedServices,
         notes: document.getElementById('appointmentNotes').value.trim(),
         total: total,
-        duration: duration
+        duration: duration,
+        photos: photosBase64
     };
     
     db.appointments.push(appointment);
-    
     if (saveData()) {
         showSuccess('✓ Процедура добавлена');
         closeModal('addAppointmentModal');
@@ -503,27 +514,27 @@ function populateServicesCheckboxes() {
         const div = document.createElement('div');
         div.className = 'service-checkbox';
         div.innerHTML = `
-            <input type="checkbox" value="${service.id}" id="service_${service.id}" onchange="updateAppointmentDuration()">
+            <input type="checkbox" value="${service.id}" id="service_${service.id}">
             <label class="service-checkbox-label" for="service_${service.id}">
                 <span class="color-indicator color-${service.color}"></span>
-                ${service.name} (${service.duration} мин)
+                ${service.name}
             </label>
         `;
         container.appendChild(div);
     });
 }
 
-function updateAppointmentDuration() {
-    const selectedServices = Array.from(document.querySelectorAll('#servicesCheckboxes input:checked'))
-        .map(cb => parseInt(cb.value));
+// function updateAppointmentDuration() {
+//     const selectedServices = Array.from(document.querySelectorAll('#servicesCheckboxes input:checked'))
+//         .map(cb => parseInt(cb.value));
     
-    const duration = selectedServices.reduce((sum, serviceId) => {
-        const service = db.services.find(s => s.id === serviceId);
-        return sum + (service ? service.duration : 0);
-    }, 0);
+//     const duration = selectedServices.reduce((sum, serviceId) => {
+//         const service = db.services.find(s => s.id === serviceId);
+//         return sum + (service ? service.duration : 0);
+//     }, 0);
     
-    document.getElementById('appointmentDuration').textContent = `${duration} мин`;
-}
+//     document.getElementById('appointmentDuration').textContent = `${duration} мин`;
+// }
 
 // Calendar functions
 function renderCalendar() {
@@ -628,7 +639,7 @@ function renderSelectedDayAppointments() {
         const date = new Date(appointment.date);
         
         return `
-            <div class="card">
+            <div class="card" onclick="showAppointmentDetails(${appointment.id})">
                 <div class="card-header">
                     <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
                     <span class="badge">${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</span>
@@ -636,8 +647,8 @@ function renderSelectedDayAppointments() {
                 <div style="margin: 10px 0;">
                     ${services.map(s => `<span class="service-tag"><span class="color-indicator color-${s.color}"></span>${s.name}</span>`).join('')}
                 </div>
-                <p>💰 ${appointment.total} ₽ • ⏱ ${appointment.duration} минут</p>
-                ${appointment.notes ? `<p style="margin-top: 10px; font-style: italic; color: #999;">💬 ${appointment.notes}</p>` : ''}
+                <p>💰 ${appointment.total} BYN • ⏱ ${appointment.duration} мин</p>
+                ${appointment.notes ? `<p style="margin-top: 8px; font-style: italic; color: #999;">💬 ${appointment.notes}</p>` : ''}
             </div>
         `;
     }).join('');
@@ -690,19 +701,19 @@ function deleteService(serviceId) {
     
     db.services = db.services.filter(s => s.id !== serviceId);
     
-    // Также удаляем эту услугу из всех процедур (из массивов serviceIds)
+    
     db.appointments.forEach(app => {
         app.serviceIds = app.serviceIds.filter(id => id !== serviceId);
-        // Пересчитываем длительность и общую сумму? Лучше оставить как есть, но можно пересчитать
-        app.duration = app.serviceIds.reduce((sum, id) => {
-            const service = db.services.find(s => s.id === id);
-            return sum + (service ? service.duration : 0);
-        }, 0);
+        
+        // app.duration = app.serviceIds.reduce((sum, id) => {
+        //     const service = db.services.find(s => s.id === id);
+        //     return sum + (service ? service.duration : 0);
+        // }, 0);
     });
     
     saveData();
-    renderServices();    // перерисовываем только услуги
-    renderAll();         // или renderAll(), чтобы обновились процедуры
+    renderServices();    
+    renderAll();         
     showSuccess('Услуга удалена');
 }
 
@@ -748,10 +759,10 @@ function renderDashboard() {
         const date = new Date(appointment.date);
         
         return `
-            <div class="card">
+            <div class="card" onclick="showAppointmentDetails(${appointment.id})">
                 <div class="card-header">
                     <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
-                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} ₽</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
+                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} BYN</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
                 </div>
                 <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
                 <p>✨ ${services.map(s => s.name).join(', ')}</p>
@@ -882,10 +893,10 @@ function renderAppointments() {
         const date = new Date(appointment.date);
         
         return `
-            <div class="card">
+            <div class="card" onclick="showAppointmentDetails(${appointment.id})">
                 <div class="card-header">
                     <h3>${client ? client.name : 'Неизвестный клиент'}</h3>
-                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} ₽</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
+                    <div style="display:flex;gap:10px;align-items:center;"><span class="badge">${appointment.total} BYN</span><button class="btn btn-small btn-secondary" onclick="event.stopPropagation(); deleteAppointment(${appointment.id})">🗑</button></div>
                 </div>
                 <p>📅 ${date.toLocaleDateString('ru-RU')} в ${date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</p>
                 <div style="margin: 10px 0;">
@@ -896,6 +907,40 @@ function renderAppointments() {
             </div>
         `;
     }).join('');
+}
+
+function showAppointmentDetails(id) {
+    const appointment = db.appointments.find(a => a.id === id);
+    if (!appointment) return;
+    
+    const client = db.clients.find(c => c.id === appointment.clientId);
+    const services = appointment.serviceIds.map(sid => db.services.find(s => s.id === sid)).filter(s => s);
+    const date = new Date(appointment.date);
+    
+    let photosHtml = '';
+    if (appointment.photos && appointment.photos.length) {
+        photosHtml = '<h4>📸 Фото процедуры:</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">';
+        appointment.photos.forEach(photo => {
+            photosHtml += `<img src="${photo}" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 10px; cursor: pointer;" onclick="window.open(this.src)">`;
+        });
+        photosHtml += '</div>';
+    } else {
+        photosHtml = '<p>Фото не прикреплены</p>';
+    }
+    
+    const content = `
+        <div><strong>Клиент:</strong> ${client ? client.name : 'Неизвестный'}</div>
+        <div><strong>Дата и время:</strong> ${date.toLocaleString('ru-RU')}</div>
+        <div><strong>Услуги:</strong><br>${services.map(s => `• ${s.name}`).join('<br>')}</div>
+        <div><strong>Общая сумма:</strong> ${appointment.total} BYN</div>
+        <div><strong>Общее время:</strong> ${appointment.duration} мин</div>
+        ${appointment.notes ? `<div><strong>Заметки:</strong> ${appointment.notes}</div>` : ''}
+        <div style="margin-top: 15px;">${photosHtml}</div>
+        <button class="btn btn-small" style="background:#ef4444; margin-top: 20px;" onclick="deleteAppointment(${appointment.id}); closeModal('appointmentDetailsModal');">Удалить процедуру</button>
+    `;
+    
+    document.getElementById('appointmentDetailsContent').innerHTML = content;
+    document.getElementById('appointmentDetailsModal').classList.add('active');
 }
 
 function renderServices() {
@@ -941,7 +986,6 @@ function renderServices() {
                         <h3>${service.name}</h3>
                         <button class="btn-small btn-secondary" onclick="event.stopPropagation(); deleteService(${service.id})" style="background:#ef4444; color:white;">🗑</button>
                     </div>
-                    <p>⏱ ${service.duration} минут</p>
                 </div>
             `).join('');
         }

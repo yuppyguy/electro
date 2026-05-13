@@ -879,10 +879,6 @@
                     <input type="text" id="serviceName" required placeholder="Например: Верхняя губа">
                 </div>
                 <div class="form-group">
-                    <label>Длительность (мин) *</label>
-                    <input type="number" id="serviceDuration" required min="5" step="5">
-                </div>
-                <div class="form-group">
                     <label>Категория</label>
                     <select id="serviceColor">
                         <option value="face">🟣 Лицо</option>
@@ -923,7 +919,8 @@
                     <input type="number" id="appointmentTotal" min="0" step="1" placeholder="Введите сумму">
                 </div>
                 <div class="form-group">
-                    <label>Общее время: <span id="appointmentDuration" style="color: #667eea; font-weight: 700;">0 мин</span></label>
+                    <label>Общее время (мин) *</label>
+                    <input type="number" id="appointmentDurationInput" required min="0" step="5">
                 </div>
                 <div class="form-group">
                     <label>Заметки</label>
@@ -935,6 +932,17 @@
                 </div>
                 <button type="submit" class="btn">Сохранить процедуру</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Appointment Details -->
+    <div id="appointmentDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Детали процедуры</h2>
+                <button class="close-btn" onclick="closeModal('appointmentDetailsModal')">&times;</button>
+            </div>
+            <div id="appointmentDetailsContent"></div>
         </div>
     </div>
 
